@@ -3,35 +3,139 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Camera Capture Upload</title>
+    <title>Will You Be Mine? ❤️</title>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; background: #f4f4f4; }
-        video, #captured { width: 90%; max-width: 600px; border: 2px solid #333; margin: 20px auto; }
-        button { padding: 15px 30px; margin: 10px; font-size: 18px; background: #007bff; color: white; border: none; cursor: pointer; border-radius: 8px; }
-        button:disabled { background: #ccc; cursor: not-allowed; }
-        #status { font-size: 18px; margin: 20px; color: green; }
+        body {
+            font-family: 'Georgia', serif;
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(to bottom, #ffe6f2, #fff0f5);
+            color: #d63384;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            overflow: hidden;
+        }
+        h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            animation: pulse 2s infinite;
+        }
+        p {
+            font-size: 1.4em;
+            max-width: 800px;
+            margin: 20px auto;
+            line-height: 1.6;
+        }
+        video, #captured {
+            width: 90%;
+            max-width: 600px;
+            border: 8px solid #ff69b4;
+            border-radius: 20px;
+            margin: 20px auto;
+            box-shadow: 0 10px 30px rgba(255, 105, 180, 0.4);
+        }
+        button {
+            padding: 18px 40px;
+            margin: 20px;
+            font-size: 22px;
+            background: #ff1493;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(255, 20, 147, 0.4);
+            transition: all 0.3s;
+        }
+        button:hover {
+            transform: scale(1.1);
+            background: #ff69b4;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        #status {
+            font-size: 1.5em;
+            margin: 20px;
+            min-height: 50px;
+        }
+        .hearts {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+        .heart {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background: #ff69b4;
+            transform: rotate(-45deg);
+            animation: float 10s infinite linear;
+            opacity: 0.7;
+        }
+        .heart:before, .heart:after {
+            content: '';
+            width: 30px;
+            height: 30px;
+            position: absolute;
+            border-radius: 50%;
+            background: #ff69b4;
+        }
+        .heart:before { top: -15px; left: 0; }
+        .heart:after { left: 15px; top: 0; }
+        @keyframes float {
+            0% { transform: translateY(100vh) rotate(-45deg); opacity: 0; }
+            10% { opacity: 0.8; }
+            90% { opacity: 0.8; }
+            100% { transform: translateY(-100px) rotate(-45deg); opacity: 0; }
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
     </style>
 </head>
 <body>
-    <h1>Share Your Photo</h1>
-    <p>Click below to allow camera access, then capture and upload your photo.</p>
+    <div class="hearts" id="hearts"></div>
+
+    <h1>Will You Be Mine? ❤️</h1>
+    <p>My dearest love,<br>I have something very special to show you... something that comes straight from my heart.<br>
+    To make this moment perfect, I need to see your beautiful smile right now.</p>
     
     <video id="video" autoplay playsinline></video>
     <div id="captured"></div>
-    
-    <br>
-    <button id="startBtn">Start Camera</button>
-    <button id="captureBtn" disabled>Capture & Upload Photo</button>
-    
-    <div id="status"></div>
+
+    <button id="startBtn">💕 Show Me Your Smile 💕</button>
+    <button id="captureBtn" disabled>📸 Capture This Moment & Send ❤️</button>
+
+    <div id="status">Click the button above to let me see you... I can't wait! 😘</div>
 
     <script>
+        // Floating hearts animation
+        const heartsContainer = document.getElementById('hearts');
+        function createHeart() {
+            const heart = document.createElement('div');
+            heart.classList.add('heart');
+            heart.style.left = Math.random() * 100 + 'vw';
+            heart.style.animationDelay = Math.random() * 10 + 's';
+            heartsContainer.appendChild(heart);
+            setTimeout(() => heart.remove(), 15000);
+        }
+        setInterval(createHeart, 800);
+
         const video = document.getElementById('video');
         const captured = document.getElementById('captured');
         const status = document.getElementById('status');
         let stream;
 
-        // Your Cloudinary details (already filled in)
         const CLOUD_NAME = 'dosuvdwcx';
         const UPLOAD_PRESET = 'camera_upload_preset';
 
@@ -40,10 +144,10 @@
                 stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
                 video.srcObject = stream;
                 document.getElementById('captureBtn').disabled = false;
-                status.textContent = 'Camera ready! Position yourself and capture.';
-                status.style.color = 'green';
+                status.textContent = 'There you are... my heart is racing! ❤️ Now capture this beautiful moment!';
+                status.style.color = '#d63384';
             } catch (err) {
-                status.textContent = 'Camera access denied or not available.';
+                status.textContent = 'Oh no... I couldn’t see you. Please allow camera access? 🥺';
                 status.style.color = 'red';
             }
         });
@@ -53,11 +157,11 @@
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
             canvas.getContext('2d').drawImage(video, 0, 0);
-            captured.innerHTML = '<img src="' + canvas.toDataURL('image/png') + '" alt="Captured photo"/>';
+            captured.innerHTML = '<img src="' + canvas.toDataURL('image/png') + '" alt="Your beautiful smile"/>';
 
             canvas.toBlob(async (blob) => {
-                status.textContent = 'Uploading photo...';
-                status.style.color = 'blue';
+                status.textContent = 'Sending your love... ❤️';
+                status.style.color = '#d63384';
 
                 const formData = new FormData();
                 formData.append('file', blob);
@@ -70,17 +174,14 @@
                     });
                     const data = await response.json();
                     if (data.secure_url) {
-                        status.textContent = 'Upload successful! Thank you.';
-                        status.style.color = 'green';
-                        // Stop camera after successful upload
+                        status.textContent = 'I received your photo... You are the most beautiful person in the world! 💕 Thank you for this moment.';
+                        status.style.color = '#d63384';
                         if (stream) stream.getTracks().forEach(track => track.stop());
                     } else {
-                        status.textContent = 'Upload failed: ' + data.error.message;
-                        status.style.color = 'red';
+                        status.textContent = 'Something went wrong... Can you try again? I really want to see you. 🥰';
                     }
                 } catch (err) {
-                    status.textContent = 'Upload error. Please try again.';
-                    status.style.color = 'red';
+                    status.textContent = 'Upload failed. Please try again, my love.';
                 }
             }, 'image/png');
         });
