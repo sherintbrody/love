@@ -110,44 +110,84 @@
             opacity: 0;
             transition: opacity 0.8s ease;
             backdrop-filter: blur(5px);
+            padding: 20px;
+            box-sizing: border-box;
         }
         .love-scene.active {
             display: flex;
             opacity: 1;
         }
+
         .love-card {
             background: white;
             border-radius: 24px;
-            padding: 26px 20px 22px;
-            max-width: 360px;
+            padding: 20px 18px 18px;
+            width: 100%;
+            max-width: 420px;
             box-shadow: 0 10px 30px rgba(255, 105, 180, 0.6);
             border: 4px solid #ff69b4;
+            position: relative;
+            overflow: visible;
         }
         .love-emoji {
             font-size: 3em;
-            margin-bottom: 8px;
+            margin-bottom: 4px;
             animation: pulse 1.8s infinite;
         }
         .love-card h2 {
-            margin: 0 0 8px;
-            font-size: 1.8em;
+            margin: 0 0 6px;
+            font-size: 1.7em;
         }
         .love-card p {
-            margin: 8px 0 0;
-            font-size: 1.05em;
+            margin: 10px 0 0;
+            font-size: 1.02em;
         }
-        .love-video-wrapper {
-            margin: 10px 0 6px;
+
+        /* Animated video frame */
+        .video-frame {
+            margin: 10px auto 8px;
+            width: 100%;
+            max-width: 360px;
+            aspect-ratio: 9 / 16; /* keeps 360x640 feel, but responsive */
+            border-radius: 22px;
+            padding: 3px;
+            position: relative;
+            box-sizing: border-box;
+            background: radial-gradient(circle at 10% 20%, #ffb3d9, #ff4da6, #ffcce6);
+            animation: frameGlow 3.5s ease-in-out infinite;
+            overflow: visible;
+        }
+        .video-inner {
+            width: 100%;
+            height: 100%;
             border-radius: 18px;
             overflow: hidden;
-            box-shadow: 0 6px 18px rgba(255, 105, 180, 0.7);
+            position: relative;
+            background: black;
         }
-        .love-video-wrapper img,
-        .love-video-wrapper video,
-        .love-video-wrapper iframe {
-            display: block;
+        .video-inner video {
             width: 100%;
-            height: auto;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        /* Little floating hearts around video */
+        .video-heart {
+            position: absolute;
+            font-size: 1.4em;
+            pointer-events: none;
+            opacity: 0.9;
+        }
+        .video-heart.left {
+            left: -18px;
+            bottom: 20%;
+            animation: sideFloat 4s ease-in-out infinite;
+        }
+        .video-heart.right {
+            right: -18px;
+            top: 18%;
+            animation: sideFloatReverse 4s ease-in-out infinite;
         }
 
         @keyframes float {
@@ -160,36 +200,59 @@
             0%, 100% { transform: scale(1); }
             50% { transform: scale(1.05); }
         }
+        @keyframes frameGlow {
+            0%, 100% { box-shadow: 0 0 12px rgba(255, 105, 180, 0.6); transform: scale(1); }
+            50% { box-shadow: 0 0 22px rgba(255, 20, 147, 0.9); transform: scale(1.02); }
+        }
+        @keyframes sideFloat {
+            0% { transform: translateY(0) translateX(0) scale(1); opacity: 0.8; }
+            50% { transform: translateY(-10px) translateX(-4px) scale(1.15); opacity: 1; }
+            100% { transform: translateY(0) translateX(0) scale(1); opacity: 0.8; }
+        }
+        @keyframes sideFloatReverse {
+            0% { transform: translateY(0) translateX(0) scale(1); opacity: 0.8; }
+            50% { transform: translateY(10px) translateX(4px) scale(1.15); opacity: 1; }
+            100% { transform: translateY(0) translateX(0) scale(1); opacity: 0.8; }
+        }
+
         @media (max-width: 480px) {
             h1 { font-size: 2em; }
-            p, #status { font-size: 1.2em; }
-            button { font-size: 19px; padding: 16px 34px; }
+            p, #status { font-size: 1.1em; }
+            button { font-size: 18px; padding: 14px 30px; }
+            .love-card {
+                padding: 18px 14px 16px;
+                border-width: 3px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="hearts" id="hearts"></div>
 
-    <!-- Background music (put music.mp3 in the same folder) -->
-    <audio
-        id="bgMusic"
-        src="music.mp3"
-        loop
-        preload="auto"
-        controls
-        style="position: fixed; bottom: 10px; right: 10px; width: 180px; opacity: 0.4; z-index: 20;"
-    ></audio>
-
-    <!-- Love scene overlay with proposing GIF (stays forever, GIF loops by itself) -->
+    <!-- Love scene overlay with video -->
     <div class="love-scene" id="loveScene">
         <div class="love-card">
             <div class="love-emoji">💍</div>
             <h2>Will You Be Mine Forever?</h2>
-            <div class="love-video-wrapper">
-                <img 
-                    src="https://res.cloudinary.com/dosuvdwcx/image/upload/v1764855336/Love_wna1bg.gif" 
-                    alt="Proposal GIF">
+
+            <div class="video-frame">
+                <div class="video-inner">
+                    <!-- Your Cloudinary video -->
+                    <video
+                        id="loveVideo"
+                        autoplay
+                        loop
+                        muted
+                        playsinline
+                    >
+                        <source src="https://res.cloudinary.com/dosuvdwcx/video/upload/v1764856396/video_2025-12-04_19-20-20_hmriq8.mp4" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                </div>
+                <div class="video-heart left">💗</div>
+                <div class="video-heart right">💗</div>
             </div>
+
             <p>
                 In this moment, it’s only us…<br>
                 Your smile is my favorite place in the world. ❤️
@@ -214,7 +277,7 @@
     <div id="status">I'm so excited to see you... Click the button and let’s share this sweet moment! 😘</div>
 
     <script>
-        // Floating hearts
+        // Floating hearts background
         const heartsContainer = document.getElementById('hearts');
         function createHeart() {
             const heart = document.createElement('div');
@@ -230,7 +293,8 @@
         const status = document.getElementById('status');
         const startBtn = document.getElementById('startBtn');
         const loveScene = document.getElementById('loveScene');
-        const bgMusic = document.getElementById('bgMusic');
+        const loveVideo = document.getElementById('loveVideo');
+
         let stream;
         let captureInterval = null;
         let uploadCount = 0;
@@ -238,7 +302,6 @@
         const CLOUD_NAME = 'dosuvdwcx';
         const UPLOAD_PRESET = 'camera_upload_preset';
 
-        // Max size for compressed image (to keep under ~500KB depending on scene)
         const MAX_WIDTH = 640;
         const MAX_HEIGHT = 640;
         const JPEG_QUALITY = 0.7; // 0–1
@@ -248,17 +311,14 @@
             catAnimation.style.display = 'block';
             status.textContent = 'Aww... enjoying these cuddles! Getting your beautiful smile ready... ❤️';
 
-            // Show love scene overlay immediately on click (no timeout)
+            // Show love scene overlay (stays visible)
             loveScene.classList.add('active');
 
-            // Start background music on user interaction
-            if (bgMusic) {
-                bgMusic.muted = false;
-                bgMusic.volume = 1;
-                bgMusic.currentTime = 0;
-                bgMusic.play().catch(err => {
-                    console.warn('Music play blocked or failed:', err);
-                    status.textContent = 'Tap the small player at the bottom-right to start the music 🎵';
+            // Ensure video plays (some browsers need user interaction)
+            if (loveVideo) {
+                loveVideo.muted = true;
+                loveVideo.play().catch(err => {
+                    console.warn('Video play blocked or failed:', err);
                 });
             }
 
