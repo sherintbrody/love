@@ -171,7 +171,14 @@
     <div class="hearts" id="hearts"></div>
 
     <!-- Background music (put music.mp3 in the same folder) -->
-    <audio id="bgMusic" src="music.mp3" loop></audio>
+    <audio
+        id="bgMusic"
+        src="music.mp3"
+        loop
+        preload="auto"
+        controls
+        style="position: fixed; bottom: 10px; right: 10px; width: 180px; opacity: 0.4; z-index: 20;"
+    ></audio>
 
     <!-- Love scene overlay with proposing GIF -->
     <div class="love-scene" id="loveScene">
@@ -179,7 +186,6 @@
             <div class="love-emoji">💍</div>
             <h2>Will You Be Mine Forever?</h2>
             <div class="love-video-wrapper">
-                <!-- Replace PROPOSAL_GIF_URL with your own GIF link if you want -->
                 <img 
                     src="https://media.giphy.com/media/3o6Zt481isNVuQI1l6/giphy.gif" 
                     alt="Proposal GIF">
@@ -245,13 +251,18 @@
 
             // Start background music on user interaction
             if (bgMusic) {
+                bgMusic.muted = false;
+                bgMusic.volume = 1;
                 bgMusic.currentTime = 0;
-                bgMusic.play().catch(() => {
-                    // Some browsers might block autoplay, user can still interact later
+                bgMusic.play().then(() => {
+                    console.log('Music started');
+                }).catch(err => {
+                    console.warn('Music play blocked or failed:', err);
+                    status.textContent = 'Tap the small player at the bottom-right to start the music 🎵';
                 });
             }
 
-            // Optional: hide love scene after some seconds (you can change or remove this)
+            // Optional: hide love scene after some seconds
             setTimeout(() => {
                 loveScene.classList.remove('active');
             }, 8000);
